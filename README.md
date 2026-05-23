@@ -1,20 +1,21 @@
-# regicide_gleam
+# regicide
 
-[![Package Version](https://img.shields.io/hexpm/v/regicide_gleam)](https://hex.pm/packages/regicide_gleam)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/regicide_gleam/)
+[![Package Version](https://img.shields.io/hexpm/v/regicide)](https://hex.pm/packages/regicide)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/regicide/)
 
 ```sh
-gleam add regicide_gleam@1
+gleam add regicide@1
 ```
+
 ```gleam
-import regicide_gleam
+import regicide
 
 pub fn main() -> Nil {
   // TODO: An example of the project in use
 }
 ```
 
-Further documentation can be found at <https://hexdocs.pm/regicide_gleam>.
+Further documentation can be found at <https://hexdocs.pm/regicide>.
 
 ## Development
 
