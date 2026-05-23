@@ -7,6 +7,10 @@ pub opaque type Card {
   Card(value: Value, suit: Suit)
 }
 
+/// test function for creating cards
+/// 
+/// Not intended for production use, since invalid number values panic
+@internal
 pub fn card(value value: Value, suit suit: Suit) -> Card {
   case value {
     Num(i) if i > 10 -> panic as "illegal card value"
