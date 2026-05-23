@@ -74,39 +74,6 @@ pub fn new_castle() -> List(Card) {
   |> list.append(list_of_face(King))
 }
 
-/// takes the top cards from the list, returning the two lists
-/// as #(drawn, remaining)
-/// 
-/// Error if not enough cards in the list
-pub fn draw(from l: List(a), take n: Int) -> Result(#(List(a), List(a)), Nil) {
-  case l |> list.length {
-    len if len >= n -> {
-      Ok(#(list.take(l, n), list.drop(l, n)))
-    }
-    _ -> Error(Nil)
-  }
-}
-
-pub fn sort_by_value(cards l: List(Card)) -> List(Card) {
-  l |> double_sort(compare_by_value, compare_by_suite)
-}
-
-pub fn sort_by_suit(cards l: List(Card)) -> List(Card) {
-  l |> double_sort(compare_by_suite, compare_by_value)
-}
-
-fn compare_by_value(a: Card, b: Card) -> Order {
-  let assert Ok(a_idx) = sorted_values |> index_of(a.value)
-  let assert Ok(b_idx) = sorted_values |> index_of(b.value)
-  int.compare(a_idx, b_idx)
-}
-
-fn compare_by_suite(a: Card, b: Card) -> Order {
-  let assert Ok(a_idx) = sorted_suits |> index_of(a.suit)
-  let assert Ok(b_idx) = sorted_suits |> index_of(b.suit)
-  int.compare(a_idx, b_idx)
-}
-
 /// Returns randomized list of number cards for the given suit
 fn num_list_of(suit: Suit) -> List(Card) {
   [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] |> list.map(num_from(_, suit)) |> list.shuffle
@@ -125,6 +92,43 @@ fn face_from(value: FaceType, suit: Suit) -> Card {
   Card(value: Face(value), suit:)
 }
 
+/// takes the top cards from the list, returning the two lists
+/// as #(drawn, remaining)
+///
+/// Error if not enough cards in the list
+pub fn draw(from l: List(a), take n: Int) -> Result(#(List(a), List(a)), Nil) {
+  case l |> list.length {
+    len if len >= n -> {
+      Ok(#(list.take(l, n), list.drop(l, n)))
+    }
+    _ -> Error(Nil)
+  }
+}
+
+///  sorts cards first by value, then by suit
+pub fn sort_by_value(cards l: List(Card)) -> List(Card) {
+  l |> sort_by([compare_by_value, compare_by_suite])
+}
+
+/// sorts cards first by suit, then by value
+pub fn sort_by_suit(cards l: List(Card)) -> List(Card) {
+  l |> sort_by([compare_by_suite, compare_by_value])
+}
+
+/// compares card values against the sorted standard
+fn compare_by_value(a: Card, b: Card) -> Order {
+  let assert Ok(a_idx) = sorted_values |> index_of(a.value)
+  let assert Ok(b_idx) = sorted_values |> index_of(b.value)
+  int.compare(a_idx, b_idx)
+}
+
+/// compares card suits agains the sorted standard
+fn compare_by_suite(a: Card, b: Card) -> Order {
+  let assert Ok(a_idx) = sorted_suits |> index_of(a.suit)
+  let assert Ok(b_idx) = sorted_suits |> index_of(b.suit)
+  int.compare(a_idx, b_idx)
+}
+
 fn index_of(list l: List(a), value v: a) -> Result(Int, Nil) {
   list.index_map(l, fn(x, i) { #(i, x) })
   |> list.find(fn(index_value) {
@@ -137,12 +141,22 @@ fn index_of(list l: List(a), value v: a) -> Result(Int, Nil) {
   })
 }
 
-fn double_sort(
-  list l: List(a),
-  sort1 s1: fn(a, a) -> Order,
-  sort2 s2: fn(a, a) -> Order,
-) -> List(a) {
-  l |> sort_group_equal(s1) |> list.map(list.sort(_, s2)) |> list.flatten
+/// Sorts a list by multiple sorting functions, applying each successive
+/// sort function as a tie-breaker on equalities.
+fn sort_by(list l: List(a), by s: List(fn(a, a) -> Order)) -> List(a) {
+  sort_by_loop([l], s) |> list.flatten
+}
+
+fn sort_by_loop(
+  list l: List(List(a)),
+  by s: List(fn(a, a) -> Order),
+) -> List(List(a)) {
+  case s {
+    [] -> l
+    [s, ..rest] -> {
+      sort_by_loop(l |> list.map(sort_group_equal(_, s)) |> list.flatten, rest)
+    }
+  }
 }
 
 fn sort_group_equal(l: List(a), sort: fn(a, a) -> Order) -> List(List(a)) {
