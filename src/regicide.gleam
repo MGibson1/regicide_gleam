@@ -1,5 +1,6 @@
-import gleam/io
+import regicide/game_state.{type GameState}
 
-pub fn main() -> Nil {
-  io.println("Hello from regicide_gleam!")
+pub type Model {
+  None
+  Playing(state: GameState)
 }
