@@ -65,6 +65,7 @@ Face values have two states
 
 Player starts and may select cards to attack with from their hand
 
-- duplicates may be played together up to a total power of 10 (limit ignores aces)
-- aces of any suit can be played with any other set of cards. all powers played apply
-- powers derived from the suit of the currently showing
+- duplicates may be played together up to a total power of 10
+- aces of any suit can be played with up to one of any other card
+- when playing a set of cards, all powers played apply. Resolve hearts before draw
+- shield's are cumulative over an entire encounter

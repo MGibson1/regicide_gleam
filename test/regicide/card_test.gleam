@@ -13,6 +13,10 @@ pub fn draw_not_enough_test() {
   [1, 2] |> card.draw(5) |> should.be_error
 }
 
+pub fn draw_zero_test() {
+  [1, 2, 3, 4] |> card.draw(0) |> should.equal(Ok(#([], [1, 2, 3, 4])))
+}
+
 pub fn sort_by_suit_test() {
   [
     card(value: Num(10), suit: Shield),

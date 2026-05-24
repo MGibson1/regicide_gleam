@@ -1,0 +1,3 @@
+pub type UiState {
+  UiState
+}
