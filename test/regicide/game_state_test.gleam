@@ -22,15 +22,30 @@ pub fn new_game_test() {
 
   castle |> list.length |> should.equal(11)
   // first opponent is a jack
-  opponent |> opponent.attack |> should.equal(10)
+  opponent |> opponent.card |> card.value |> should.equal(card.Face(card.Jack))
   tavern |> list.length |> should.equal(32)
   discard |> should.equal([])
   hand |> set.size |> should.equal(8)
   in_play |> should.equal([])
   redraws |> should.equal(2)
   // game starts with player attacking
-  phase |> should.equal(game_state.Attacking)
+  phase |> should.equal(game_state.Attacking(set.new()))
 
+  castle
+  |> list.map(card.value)
+  |> should.equal([
+    card.Face(card.Jack),
+    card.Face(card.Jack),
+    card.Face(card.Jack),
+    card.Face(card.Queen),
+    card.Face(card.Queen),
+    card.Face(card.Queen),
+    card.Face(card.Queen),
+    card.Face(card.King),
+    card.Face(card.King),
+    card.Face(card.King),
+    card.Face(card.King),
+  ])
   [opponent |> opponent.card] |> intersection(with: castle) |> should.equal([])
   hand |> set.to_list |> intersection(with: tavern) |> should.equal([])
 }
@@ -39,7 +54,7 @@ fn intersection(l1: List(a), with l2: List(a)) -> List(a) {
   l1 |> set.from_list |> set.intersection(set.from_list(l2)) |> set.to_list
 }
 
-fn random_game_state(phase: game_state.Phase) -> GameState {
+fn random_game_state() -> GameState {
   let gs = game_state.new()
   let assert Ok(#(in_tavern, castle)) =
     card.new_castle() |> card.draw(int.random(12))
@@ -69,15 +84,14 @@ fn random_game_state(phase: game_state.Phase) -> GameState {
     tavern:,
     in_play: [in_play_cards |> set.from_list],
     redraws: 2,
-    phase:,
   )
 }
 
 pub fn apply_heal_test() {
-  let gs = random_game_state(game_state.Attacking)
+  let gs = random_game_state()
   let result =
     gs
-    |> game_state.apply_heal(turn.Effect(heal: 1, shield: 0, damage: 0, draw: 0))
+    |> game_state.apply_heal(1)
 
   case gs.discard |> list.length {
     0 -> result |> should.equal(gs)
@@ -97,15 +111,10 @@ pub fn apply_heal_test() {
 }
 
 pub fn apply_over_heal_test() {
-  let gs = random_game_state(game_state.Attacking)
+  let gs = random_game_state()
   let result =
     gs
-    |> game_state.apply_heal(turn.Effect(
-      heal: 100,
-      shield: 0,
-      damage: 0,
-      draw: 0,
-    ))
+    |> game_state.apply_heal(100)
 
   case gs.discard |> list.length {
     0 -> result |> should.equal(gs)
@@ -125,16 +134,12 @@ pub fn apply_over_heal_test() {
   }
 }
 
+// TODO: gs equality is flaky due to set equivalence being ordered
 pub fn attempt_to_draw_over_max_hand_size_test() {
-  let gs = random_game_state(game_state.Attacking)
+  let gs = random_game_state()
   let result =
     gs
-    |> game_state.apply_draw(turn.Effect(
-      draw: 10,
-      heal: 0,
-      shield: 0,
-      damage: 0,
-    ))
+    |> game_state.apply_draw(10)
 
   case gs.hand |> set.size {
     8 -> result |> should.equal(gs)
@@ -158,10 +163,10 @@ pub fn attempt_to_draw_over_max_hand_size_test() {
 }
 
 pub fn apply_draw_test() {
-  let gs = random_game_state(game_state.Attacking)
+  let gs = random_game_state()
   let result =
     gs
-    |> game_state.apply_draw(turn.Effect(draw: 1, heal: 0, shield: 0, damage: 0))
+    |> game_state.apply_draw(1)
 
   case gs.hand |> set.size {
     8 -> result |> should.equal(gs)
@@ -179,14 +184,14 @@ pub fn apply_draw_test() {
 }
 
 pub fn damage_opponent_test() {
-  let gs = random_game_state(game_state.Attacking)
+  let gs = random_game_state()
 
   let original_health = gs.opponent |> opponent.health
 
   let damage = int.random(100)
   let result =
     gs
-    |> game_state.apply_damage(turn.Effect(damage:, heal: 0, shield: 0, draw: 0))
+    |> game_state.apply_damage(damage)
 
   result.opponent |> opponent.health |> should.equal(original_health - damage)
 }

@@ -1,3 +1,4 @@
+import gleam/set.{type Set}
 import regicide/card.{type Card, type Suit}
 
 pub opaque type Opponent {
@@ -39,4 +40,8 @@ fn health_for(card: Card) -> Int {
 
 fn attack_for(card: Card) -> Int {
   card |> card.attack_value
+}
+
+pub fn is(opponent: Opponent, suit: Suit) -> Bool {
+  opponent.suit == suit
 }

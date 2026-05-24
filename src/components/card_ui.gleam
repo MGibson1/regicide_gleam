@@ -1,0 +1,48 @@
+import components/ui.{labeled_text}
+import gleam/int
+import gleam/list
+import lustre/attribute
+import lustre/element.{type Element}
+import lustre/element/html
+import model.{type Msg}
+import regicide/card.{type Card, Face, Jack, King, Num, Queen}
+import regicide/game_state
+
+pub fn face_down_pile(label: String, cards: List(Card)) -> Element(Msg) {
+  html.div([], [
+    labeled_text(label, cards |> list.length |> int.to_string),
+  ])
+}
+
+pub fn view_card(card: Card, gs: game_state.GameState) -> Element(Msg) {
+  html.div(
+    [
+      attribute.class(
+        "border-1 m-2 p-2 w-min flex flex-col justify-center content-center",
+      ),
+      attribute.classes([#("border-3", gs |> game_state.is_selected(card))]),
+    ],
+    [
+      labeled_text("suit", suit_text(card)),
+      labeled_text("value", value_text(card)),
+    ],
+  )
+}
+
+fn value_text(card: Card) -> String {
+  case card |> card.value {
+    Num(n) -> int.to_string(n)
+    Face(Jack) -> "Jack"
+    Face(Queen) -> "Queen"
+    Face(King) -> "King"
+  }
+}
+
+fn suit_text(card: Card) -> String {
+  case card |> card.suit {
+    card.Shield -> "Shield"
+    card.Heart -> "Heart"
+    card.Club -> "Club"
+    card.Draw -> "Draw"
+  }
+}

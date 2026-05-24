@@ -1,6 +1,7 @@
 import gleam/set
 import gleeunit/should
 import regicide/card
+import regicide/opponent
 import regicide/turn
 
 pub fn valid_single_test() {
@@ -108,26 +109,30 @@ pub fn valid_two_of_a_kind_test() {
   turn.is_valid(play) |> should.be_true
 }
 
+fn op(suit: card.Suit) -> opponent.Opponent {
+  opponent.from(card.card(card.Face(card.Jack), suit))
+}
+
 pub fn effect_of_card_test() {
   // Heart
   [card.card(card.Num(3), card.Heart)]
   |> set.from_list
-  |> turn.effect([])
+  |> turn.effect([], op(card.Draw))
   |> should.equal(turn.Effect(heal: 3, shield: 0, damage: 3, draw: 0))
   // Club
   [card.card(card.Num(3), card.Club)]
   |> set.from_list
-  |> turn.effect([])
+  |> turn.effect([], op(card.Draw))
   |> should.equal(turn.Effect(heal: 0, shield: 0, damage: 6, draw: 0))
   // Shield
   [card.card(card.Num(3), card.Shield)]
   |> set.from_list
-  |> turn.effect([])
+  |> turn.effect([], op(card.Draw))
   |> should.equal(turn.Effect(heal: 0, shield: 3, damage: 3, draw: 0))
   // Draw
   [card.card(card.Num(3), card.Draw)]
   |> set.from_list
-  |> turn.effect([])
+  |> turn.effect([], op(card.Heart))
   |> should.equal(turn.Effect(heal: 0, shield: 0, damage: 3, draw: 3))
 }
 
@@ -135,29 +140,29 @@ pub fn effect_of_ace_test() {
   // Heart
   [card.card(card.Num(3), card.Heart), card.card(card.Num(1), card.Heart)]
   |> set.from_list
-  |> turn.effect([])
+  |> turn.effect([], op(card.Draw))
   |> should.equal(turn.Effect(heal: 4, shield: 0, damage: 4, draw: 0))
   // Club
   [card.card(card.Num(3), card.Heart), card.card(card.Num(1), card.Club)]
   |> set.from_list
-  |> turn.effect([])
+  |> turn.effect([], op(card.Draw))
   |> should.equal(turn.Effect(heal: 4, shield: 0, damage: 8, draw: 0))
   // Shield
   [card.card(card.Num(3), card.Heart), card.card(card.Num(1), card.Shield)]
   |> set.from_list
-  |> turn.effect([])
+  |> turn.effect([], op(card.Draw))
   |> should.equal(turn.Effect(heal: 4, shield: 4, damage: 4, draw: 0))
   // Draw
   [card.card(card.Num(3), card.Heart), card.card(card.Num(1), card.Draw)]
   |> set.from_list
-  |> turn.effect([])
+  |> turn.effect([], op(card.Shield))
   |> should.equal(turn.Effect(heal: 4, shield: 0, damage: 4, draw: 4))
 }
 
 pub fn effect_of_heart_ace_test() {
   [card.card(card.Num(3), card.Draw), card.card(card.Num(1), card.Shield)]
   |> set.from_list
-  |> turn.effect([])
+  |> turn.effect([], op(card.Heart))
   |> should.equal(turn.Effect(heal: 0, shield: 4, damage: 4, draw: 4))
 }
 
@@ -165,17 +170,17 @@ pub fn effect_of_a_combo_test() {
   // Club
   [card.card(card.Num(3), card.Heart), card.card(card.Num(3), card.Club)]
   |> set.from_list
-  |> turn.effect([])
+  |> turn.effect([], op(card.Draw))
   |> should.equal(turn.Effect(heal: 6, shield: 0, damage: 12, draw: 0))
   // Shield
   [card.card(card.Num(3), card.Heart), card.card(card.Num(3), card.Shield)]
   |> set.from_list
-  |> turn.effect([])
+  |> turn.effect([], op(card.Draw))
   |> should.equal(turn.Effect(heal: 6, shield: 6, damage: 6, draw: 0))
   // Draw
   [card.card(card.Num(3), card.Heart), card.card(card.Num(3), card.Draw)]
   |> set.from_list
-  |> turn.effect([])
+  |> turn.effect([], op(card.Shield))
   |> should.equal(turn.Effect(heal: 6, shield: 0, damage: 6, draw: 6))
   // Club and Shield
   [
@@ -184,7 +189,7 @@ pub fn effect_of_a_combo_test() {
     card.card(card.Num(3), card.Shield),
   ]
   |> set.from_list
-  |> turn.effect([])
+  |> turn.effect([], op(card.Draw))
   |> should.equal(turn.Effect(heal: 9, shield: 9, damage: 18, draw: 0))
 }
 
@@ -201,6 +206,6 @@ pub fn effect_of_previous_play_test() {
   ]
   [card.card(card.Face(card.King), card.Draw)]
   |> set.from_list
-  |> turn.effect(prev)
+  |> turn.effect(prev, op(card.Heart))
   |> should.equal(turn.Effect(heal: 0, shield: 15, damage: 20, draw: 20))
 }

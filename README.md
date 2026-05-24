@@ -69,3 +69,10 @@ Player starts and may select cards to attack with from their hand
 - aces of any suit can be played with up to one of any other card
 - when playing a set of cards, all powers played apply. Resolve hearts before draw
 - shield's are cumulative over an entire encounter
+
+## Iconography
+
+suits are represented by: heart, club, quill, and shield
+suits matching the opponent are overlaid with a lock
+
+jokers are represented by an ouroboros
