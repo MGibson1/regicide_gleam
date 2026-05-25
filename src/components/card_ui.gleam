@@ -8,9 +8,14 @@ import model.{type Msg}
 import regicide/card.{type Card, Face, Jack, King, Num, Queen}
 import regicide/game_state
 
-pub fn face_down_pile(label: String, cards: List(Card)) -> Element(Msg) {
+pub fn face_down_pile(
+  label: String,
+  cards: List(Card),
+  next: List(Card),
+) -> Element(Msg) {
+  let len = fn(l: List(a)) { l |> list.length |> int.to_string }
   html.div([], [
-    labeled_text(label, cards |> list.length |> int.to_string),
+    labeled_text(label, cards |> len <> "(" <> next |> len <> ")"),
   ])
 }
 

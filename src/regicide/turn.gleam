@@ -78,6 +78,8 @@ fn ace_play_valid(cards s: Set(Card)) -> Bool {
 }
 
 fn combo_play_valid(s) {
+  use <- bool.guard(set.size(s) == 1, True)
+
   let values = s |> set.map(card.value)
 
   use <- bool.guard(set.size(values) != 1, False)

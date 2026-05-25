@@ -161,7 +161,7 @@ pub fn set_in_play(gs: GameState, cards: Set(Card)) {
 }
 
 pub fn attack(gs: GameState, with cards: Set(Card)) -> GameState {
-  let effect = cards |> turn.effect(gs.in_play, gs.opponent) |> echo
+  let effect = cards |> turn.effect(gs.in_play, gs.opponent)
   let gs = gs |> set_in_play(cards)
 
   // Heal
