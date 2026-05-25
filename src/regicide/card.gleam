@@ -49,6 +49,13 @@ pub fn value(c: Card) -> Value {
   c.value
 }
 
+pub fn value_string(c: Card) -> String {
+  case c.value {
+    Num(v) -> v |> int.to_string
+    Face(v) -> v |> face_type_string
+  }
+}
+
 pub fn attack_value(c: Card) -> Int {
   case c.value {
     Num(n) -> n
@@ -129,20 +136,24 @@ pub type FaceType {
   Jack
 }
 
-fn face_type_to_json(face_type: FaceType) -> json.Json {
-  case face_type {
-    King -> json.string("king")
-    Queen -> json.string("queen")
-    Jack -> json.string("jack")
+pub fn face_type_string(f: FaceType) {
+  case f {
+    King -> "King"
+    Queen -> "Queen"
+    Jack -> "Jack"
   }
+}
+
+fn face_type_to_json(face_type: FaceType) -> json.Json {
+  face_type |> face_type_string |> json.string
 }
 
 fn face_type_decoder() -> decode.Decoder(FaceType) {
   use variant <- decode.then(decode.string)
   case variant {
-    "king" -> decode.success(King)
-    "queen" -> decode.success(Queen)
-    "jack" -> decode.success(Jack)
+    "King" | "king" -> decode.success(King)
+    "Queen" | "queen" -> decode.success(Queen)
+    "Jack" | "jack" -> decode.success(Jack)
     _ -> decode.failure(King, "FaceType")
   }
 }
@@ -154,22 +165,26 @@ pub type Suit {
   Club
 }
 
-fn suit_to_json(suit: Suit) -> json.Json {
-  case suit {
-    Shield -> json.string("shield")
-    Heart -> json.string("heart")
-    Draw -> json.string("draw")
-    Club -> json.string("club")
+fn suit_string(s: Suit) -> String {
+  case s {
+    Shield -> "Shield"
+    Heart -> "Heart"
+    Draw -> "Draw"
+    Club -> "Club"
   }
+}
+
+fn suit_to_json(suit: Suit) -> json.Json {
+  suit |> suit_string |> json.string
 }
 
 fn suit_decoder() -> decode.Decoder(Suit) {
   use variant <- decode.then(decode.string)
   case variant {
-    "shield" -> decode.success(Shield)
-    "heart" -> decode.success(Heart)
-    "draw" -> decode.success(Draw)
-    "club" -> decode.success(Club)
+    "Shield" | "shield" -> decode.success(Shield)
+    "Heart" | "heart" -> decode.success(Heart)
+    "Draw" | "draw" -> decode.success(Draw)
+    "Club" | "club" -> decode.success(Club)
     _ -> decode.failure(Shield, "Suit")
   }
 }
