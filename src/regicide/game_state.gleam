@@ -1,4 +1,6 @@
+import gleam/dynamic/decode
 import gleam/int
+import gleam/json
 import gleam/list
 import gleam/set.{type Set}
 import regicide/card.{type Card}
@@ -19,11 +21,98 @@ pub type GameState {
   )
 }
 
+pub fn game_state_to_json(game_state: GameState) -> json.Json {
+  let GameState(
+    castle:,
+    tavern:,
+    discard:,
+    opponent:,
+    hand:,
+    in_play:,
+    redraws:,
+    phase:,
+  ) = game_state
+  json.object([
+    #("castle", json.array(castle, card.card_to_json)),
+    #("tavern", json.array(tavern, card.card_to_json)),
+    #("discard", json.array(discard, card.card_to_json)),
+    #("opponent", opponent.opponent_to_json(opponent)),
+    #("hand", card.card_set_to_json(hand)),
+    #("in_play", json.array(in_play, card.card_set_to_json)),
+    #("redraws", json.int(redraws)),
+    #("phase", phase_to_json(phase)),
+  ])
+}
+
+pub fn game_state_decoder() -> decode.Decoder(GameState) {
+  use castle <- decode.field("castle", decode.list(card.card_decoder()))
+  use tavern <- decode.field("tavern", decode.list(card.card_decoder()))
+  use discard <- decode.field("discard", decode.list(card.card_decoder()))
+  use opponent <- decode.field("opponent", opponent.opponent_decoder())
+  use hand <- decode.field("hand", card.card_set_decoder())
+  use in_play <- decode.field("in_play", decode.list(card.card_set_decoder()))
+  use redraws <- decode.field("redraws", decode.int)
+  use phase <- decode.field("phase", phase_decoder())
+  decode.success(
+    GameState(
+      castle:,
+      tavern:,
+      discard:,
+      opponent:,
+      hand:,
+      in_play:,
+      redraws:,
+      phase:,
+    )
+    |> echo,
+  )
+}
+
 pub type Phase {
   Attacking(with: Set(Card))
   Defending(with: Set(Card))
   Won
   Lost
+}
+
+fn phase_to_json(phase: Phase) -> json.Json {
+  case phase {
+    Attacking(with:) ->
+      json.object([
+        #("type", json.string("attacking")),
+        #("with", card.card_set_to_json(with)),
+      ])
+    Defending(with:) ->
+      json.object([
+        #("type", json.string("defending")),
+        #("with", card.card_set_to_json(with)),
+      ])
+    Won ->
+      json.object([
+        #("type", json.string("won")),
+      ])
+    Lost ->
+      json.object([
+        #("type", json.string("lost")),
+      ])
+  }
+}
+
+fn phase_decoder() -> decode.Decoder(Phase) {
+  use variant <- decode.field("type", decode.string)
+  case variant {
+    "attacking" -> {
+      use with <- decode.field("with", card.card_set_decoder())
+      decode.success(Attacking(with:))
+    }
+    "defending" -> {
+      use with <- decode.field("with", card.card_set_decoder())
+      decode.success(Defending(with:))
+    }
+    "won" -> decode.success(Won)
+    "lost" -> decode.success(Lost)
+    _ -> decode.failure(Won, "Phase")
+  }
 }
 
 pub fn new() -> GameState {

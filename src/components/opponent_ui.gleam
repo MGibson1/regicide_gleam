@@ -1,18 +1,10 @@
 import components/card_ui.{view_card}
 import components/ui.{labeled_text}
 import gleam/int
-import gleam/list
-import gleam/set
 import lustre/attribute
-import lustre/element
 import lustre/element/html
 import regicide/game_state.{type GameState}
 import regicide/opponent
-import regicide/turn
-
-pub fn opponent_view(gs: GameState) {
-  element.none()
-}
 
 pub fn opponent_card_view(gs: GameState) {
   html.div([attribute.class("flex flex-col justify-center h-full")], [

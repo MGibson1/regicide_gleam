@@ -1,8 +1,24 @@
-import gleam/set.{type Set}
+import gleam/dynamic/decode
+import gleam/json
 import regicide/card.{type Card, type Suit}
 
 pub opaque type Opponent {
   Opponent(health: Int, attack: Int, suit: Suit, card: Card)
+}
+
+pub fn opponent_to_json(opponent: Opponent) -> json.Json {
+  let Opponent(health:, attack: _, suit: _, card:) = opponent
+  json.object([
+    #("health", json.int(health)),
+    #("card", card.card_to_json(card)),
+  ])
+}
+
+pub fn opponent_decoder() -> decode.Decoder(Opponent) {
+  use health <- decode.field("health", decode.int)
+  use card <- decode.field("card", card.card_decoder())
+  let init = from(card)
+  decode.success(Opponent(..init, health:))
 }
 
 pub fn health(o: Opponent) -> Int {

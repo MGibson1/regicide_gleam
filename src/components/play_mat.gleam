@@ -11,7 +11,7 @@ import model.{type Msg}
 import regicide/game_state.{type GameState}
 
 pub fn play_ui(gs: GameState) -> Element(Msg) {
-  html.div([attribute.class("grid grid-rows-3 gap-3")], [
+  html.div([attribute.class("grid grid-rows-4 gap-3")], [
     html.div([attribute.class("row-1 flex gap-3 justify-self-center")], [
       html.div(
         [
@@ -37,20 +37,3 @@ pub fn play_ui(gs: GameState) -> Element(Msg) {
     hand_ui.view_hand(gs),
   ])
 }
-// pub fn play_ui(gs: GameState) -> Element(Msg) {
-//   html.div([attribute.class("justify-self-center p-2")], [
-//     html.div(
-//       [attribute.class("flex flex-row justify-center content-center px-12")],
-//       [
-//         html.div([attribute.class("w-min my-auto")], [
-//           tavern_ui.tavern_view(gs),
-//           discard_ui.discard_view(gs),
-//           joker_ui.joker_view(gs),
-//         ]),
-//         opponent_ui.opponent_view(gs),
-//       ],
-//     ),
-//     in_play_ui.view_in_play(gs),
-//     hand_ui.view_hand(gs),
-//   ])
-// }

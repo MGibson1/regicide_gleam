@@ -1,4 +1,6 @@
+import gleam/dynamic/decode
 import gleam/int
+import gleam/json
 import gleam/list
 import gleam/order.{type Order}
 import gleam/set.{type Set}
@@ -6,6 +8,29 @@ import regicide/list_helper.{index_of, sort_by}
 
 pub opaque type Card {
   Card(value: Value, suit: Suit)
+}
+
+pub fn card_set_to_json(cards: Set(Card)) -> json.Json {
+  json.array(cards |> set.to_list, card_to_json)
+}
+
+pub fn card_set_decoder() -> decode.Decoder(Set(Card)) {
+  use value <- decode.then(decode.list(of: card_decoder()))
+  decode.success(value |> set.from_list)
+}
+
+pub fn card_to_json(card: Card) -> json.Json {
+  let Card(value:, suit:) = card
+  json.object([
+    #("value", value |> card_value_to_json),
+    #("suit", suit |> suit_to_json),
+  ])
+}
+
+pub fn card_decoder() -> decode.Decoder(Card) {
+  use value <- decode.field("value", card_value_decoder())
+  use suit <- decode.field("suit", suit_decoder())
+  decode.success(Card(value:, suit:))
 }
 
 /// test function for creating cards
@@ -50,6 +75,36 @@ pub type Value {
   Face(FaceType)
 }
 
+fn card_value_to_json(value: Value) -> json.Json {
+  case value {
+    Num(v) -> {
+      json.object([#("type", json.string("num")), #("value", v |> json.int)])
+    }
+    Face(v) -> {
+      json.object([
+        #("type", json.string("face")),
+        #("value", v |> face_type_to_json),
+      ])
+    }
+  }
+}
+
+fn card_value_decoder() -> decode.Decoder(Value) {
+  use variant <- decode.field("type", decode.string)
+
+  case variant {
+    "num" -> {
+      use value <- decode.field("value", decode.int)
+      decode.success(Num(value))
+    }
+    "face" -> {
+      use value <- decode.field("value", face_type_decoder())
+      decode.success(Face(value))
+    }
+    _ -> decode.failure(Num(1), "invalid value type")
+  }
+}
+
 const sorted_values = [
   Num(1),
   Num(2),
@@ -74,11 +129,49 @@ pub type FaceType {
   Jack
 }
 
+fn face_type_to_json(face_type: FaceType) -> json.Json {
+  case face_type {
+    King -> json.string("king")
+    Queen -> json.string("queen")
+    Jack -> json.string("jack")
+  }
+}
+
+fn face_type_decoder() -> decode.Decoder(FaceType) {
+  use variant <- decode.then(decode.string)
+  case variant {
+    "king" -> decode.success(King)
+    "queen" -> decode.success(Queen)
+    "jack" -> decode.success(Jack)
+    _ -> decode.failure(King, "FaceType")
+  }
+}
+
 pub type Suit {
   Shield
   Heart
   Draw
   Club
+}
+
+fn suit_to_json(suit: Suit) -> json.Json {
+  case suit {
+    Shield -> json.string("shield")
+    Heart -> json.string("heart")
+    Draw -> json.string("draw")
+    Club -> json.string("club")
+  }
+}
+
+fn suit_decoder() -> decode.Decoder(Suit) {
+  use variant <- decode.then(decode.string)
+  case variant {
+    "shield" -> decode.success(Shield)
+    "heart" -> decode.success(Heart)
+    "draw" -> decode.success(Draw)
+    "club" -> decode.success(Club)
+    _ -> decode.failure(Shield, "Suit")
+  }
 }
 
 pub fn new_tavern() -> List(Card) {

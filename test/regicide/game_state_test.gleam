@@ -6,7 +6,6 @@ import regicide/card
 import regicide/constants
 import regicide/game_state.{type GameState, GameState}
 import regicide/opponent
-import regicide/turn
 
 pub fn new_game_test() {
   let GameState(

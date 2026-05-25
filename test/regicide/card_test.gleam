@@ -1,3 +1,4 @@
+import gleam/json
 import gleeunit/should
 import regicide/card.{
   Club, Draw, Face, Heart, Jack, King, Num, Queen, Shield, card,
@@ -69,4 +70,11 @@ pub fn sort_by_value_test() {
     card(value: Face(Queen), suit: Club),
     card(value: Face(King), suit: Club),
   ])
+}
+
+pub fn from_json_test() {
+  let str =
+    "{\"value\": { \"type\": \"num\", \"value\": 8 }, \"suit\": \"shield\" }"
+
+  json.parse(str, card.card_decoder()) |> should.be_ok
 }

@@ -1,9 +1,4 @@
-import components/discard_ui.{discard_view}
-import components/hand_ui.{view_hand}
-import components/in_play_ui.{view_in_play}
-import components/opponent_ui.{opponent_view}
 import components/play_mat
-import components/tavern_ui.{tavern_view}
 import lustre
 import lustre/attribute
 import lustre/effect.{type Effect}
@@ -11,8 +6,9 @@ import lustre/element.{type Element}
 import lustre/element/html
 import lustre/event
 import model.{
-  type Model, type Msg, None, Playing, UserClickedCardInHand, UserClickedForfeit,
-  UserClickedPlayCards, UserClickedRedraw, UserClickedStartGame,
+  type Model, type Msg, Empty, GameLoaded, GameSaved, None, Playing,
+  UserClickedCardInHand, UserClickedForfeit, UserClickedPlayCards,
+  UserClickedRedraw, UserClickedStartGame,
 }
 import regicide/game_state.{type GameState, Attacking, Defending}
 import regicide/ui_state.{type UiState}
@@ -25,42 +21,45 @@ pub fn main() {
 }
 
 fn init(_args) -> #(Model, Effect(Msg)) {
-  let model = None
-
-  #(model, effect.none())
+  #(None, model.load_save())
 }
 
 fn update(model: Model, message: Msg) -> #(Model, Effect(Msg)) {
   case message {
-    UserClickedStartGame -> #(
-      Playing(gs: game_state.new(), ui: ui_state.new()),
-      effect.none(),
-    )
-    UserClickedForfeit -> #(None, effect.none())
+    UserClickedStartGame -> {
+      let model = Playing(gs: game_state.new(), ui: ui_state.new())
+      #(model, model.save(model, GameSaved))
+    }
+    UserClickedForfeit -> #(None, model.delete_save())
     UserClickedRedraw ->
       case model {
         None -> #(model, effect.none())
-        Playing(gs, ui) -> #(
-          Playing(gs |> game_state.redraw, ui),
-          effect.none(),
-        )
+        Playing(gs, ui) -> {
+          let model = Playing(gs |> game_state.redraw, ui)
+          #(model, model.save(model, GameSaved))
+        }
       }
     UserClickedCardInHand(card) ->
       case model {
         None -> #(model, effect.none())
-        Playing(gs, ui) -> #(
-          Playing(gs |> game_state.toggle_selected(card), ui),
-          effect.none(),
-        )
+        Playing(gs, ui) -> {
+          let model = Playing(gs |> game_state.toggle_selected(card), ui)
+          #(model, model.save(model, GameSaved))
+        }
       }
     UserClickedPlayCards ->
       case model {
         None -> #(model, effect.none())
-        Playing(gs, ui) -> #(
-          Playing(gs |> game_state.take_turn, ui),
-          effect.none(),
-        )
+        Playing(gs, ui) -> {
+          let model = Playing(gs |> game_state.take_turn, ui)
+          #(model, model.save(model, GameSaved))
+        }
       }
+
+    GameSaved -> #(model, effect.none())
+    GameLoaded(loaded) -> #(loaded, effect.none())
+
+    Empty -> #(model, effect.none())
   }
 }
 
@@ -80,7 +79,7 @@ fn view(model: Model) -> Element(Msg) {
   ])
 }
 
-fn game_view(gs: GameState, ui: UiState) -> Element(Msg) {
+fn game_view(gs: GameState, _ui: UiState) -> Element(Msg) {
   html.div([attribute.class("flex flex-col")], [
     html.h1([], [html.text("playing")]),
     play_mat.play_ui(gs),
