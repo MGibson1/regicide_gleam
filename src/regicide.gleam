@@ -68,11 +68,24 @@ fn view(model: Model) -> Element(Msg) {
     {
       case model {
         None ->
-          html.div([], [
-            html.button([event.on_click(UserClickedStartGame)], [
-              html.text("Start Game"),
-            ]),
-          ])
+          html.div(
+            [
+              attribute.class(
+                "flex h-screen w-screen justify-center center-content",
+              ),
+            ],
+            [
+              html.button(
+                [
+                  attribute.class("w-full h-full"),
+                  event.on_click(UserClickedStartGame),
+                ],
+                [
+                  html.text("Start Game"),
+                ],
+              ),
+            ],
+          )
         Playing(gs, ui) -> game_view(gs, ui)
       }
     },
@@ -84,23 +97,6 @@ fn game_view(gs: GameState, _ui: UiState) -> Element(Msg) {
     html.h1([], [html.text("playing")]),
     play_mat.play_ui(gs),
     html.div([attribute.class("flex flex-row flex-wrap gap-3 justify-center")], [
-      {
-        case gs.phase {
-          Attacking(_) ->
-            html.button([event.on_click(UserClickedPlayCards)], [
-              html.text("Attack"),
-            ])
-          Defending(_) ->
-            html.button(
-              [
-                attribute.disabled(!{ gs |> game_state.sufficient_losses }),
-                event.on_click(UserClickedPlayCards),
-              ],
-              [html.text("Take Losses")],
-            )
-          _ -> element.none()
-        }
-      },
       html.button([event.on_click(UserClickedForfeit)], [
         html.text({
           case gs.phase {

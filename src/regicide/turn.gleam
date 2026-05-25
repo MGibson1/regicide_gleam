@@ -9,6 +9,17 @@ pub type Effect {
   Effect(heal: Int, shield: Int, damage: Int, draw: Int)
 }
 
+pub fn effect_to_string(e: Effect) -> String {
+  "heal: "
+  <> e.heal |> int.to_string
+  <> ", draw: "
+  <> e.draw |> int.to_string
+  <> ", damage: "
+  <> e.damage |> int.to_string
+  <> ", shield: "
+  <> e.shield |> int.to_string
+}
+
 pub fn no_effect() -> Effect {
   Effect(0, 0, 0, 0)
 }

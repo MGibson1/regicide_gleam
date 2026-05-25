@@ -250,7 +250,7 @@ pub fn set_in_play(gs: GameState, cards: Set(Card)) {
 }
 
 pub fn attack(gs: GameState, with cards: Set(Card)) -> GameState {
-  let effect = cards |> turn.effect(gs.in_play, gs.opponent)
+  let effect = preview_effect(gs, cards)
   let gs = gs |> set_in_play(cards)
 
   // Heal
@@ -264,6 +264,10 @@ pub fn attack(gs: GameState, with cards: Set(Card)) -> GameState {
 
   // Shield happens during defending phase
   GameState(..gs, phase: Defending(set.new()))
+}
+
+pub fn preview_effect(gs: GameState, with cards: Set(Card)) -> Effect {
+  cards |> turn.effect(gs.in_play, gs.opponent)
 }
 
 pub fn sufficient_losses(gs: GameState) -> Bool {

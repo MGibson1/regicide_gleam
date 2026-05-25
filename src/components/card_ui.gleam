@@ -14,7 +14,7 @@ pub fn face_down_pile(
   next: List(Card),
 ) -> Element(Msg) {
   let len = fn(l: List(a)) { l |> list.length |> int.to_string }
-  html.div([], [
+  html.div([attribute.class("self-start")], [
     labeled_text(label, cards |> len <> "(" <> next |> len <> ")"),
   ])
 }
