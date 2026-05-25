@@ -7,7 +7,6 @@ import model.{type Msg}
 import regicide/game_state.{type GameState}
 
 pub fn joker_view(gs: GameState) -> Element(Msg) {
-  echo fill(5, 0)
   html.button(
     [
       attribute.disabled(gs.redraws <= 0),

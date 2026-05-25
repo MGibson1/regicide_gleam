@@ -137,13 +137,18 @@ pub fn discard_hand(gs: GameState) -> GameState {
 pub fn discard(gs: GameState, cards: Set(Card)) -> GameState {
   case cards |> set.is_subset(gs.hand) {
     True -> Nil
-    False -> panic as "cannod discard card not in hand"
+    False -> panic as "cannot discard card not in hand"
   }
 
   let hand = gs.hand |> card.remove(cards)
   let discard = gs.discard |> list.append(cards |> set.to_list)
+  let phase = case gs.phase {
+    Attacking(with) -> Attacking(with |> card.safe_remove(cards))
+    Defending(with) -> Defending(with |> card.safe_remove(cards))
+    _ -> gs.phase
+  }
 
-  GameState(..gs, hand:, discard:)
+  GameState(..gs, hand:, discard:, phase:)
 }
 
 pub fn draw(gs: GameState, count: Int) -> GameState {

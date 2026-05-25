@@ -230,6 +230,10 @@ pub fn remove(from l: Set(a), take c: Set(a)) -> Set(a) {
     False -> panic as "trying to remove cards that do not exist"
   }
 
+  safe_remove(l, c)
+}
+
+pub fn safe_remove(from l: Set(a), take c: Set(a)) -> Set(a) {
   l |> set.difference(c)
 }
 
