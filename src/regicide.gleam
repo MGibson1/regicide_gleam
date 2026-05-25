@@ -67,44 +67,55 @@ fn view(model: Model) -> Element(Msg) {
   html.div([attribute.id("container")], [
     {
       case model {
-        None ->
-          html.div(
-            [
-              attribute.class(
-                "flex h-screen w-screen justify-center center-content",
-              ),
-            ],
-            [
-              html.button(
-                [
-                  attribute.class("w-full h-full"),
-                  event.on_click(UserClickedStartGame),
-                ],
-                [
-                  html.text("Start Game"),
-                ],
-              ),
-            ],
-          )
+        None -> full_screen_button("Start Game", UserClickedStartGame)
         Playing(gs, ui) -> game_view(gs, ui)
       }
     },
   ])
 }
 
+fn full_screen_button(text: String, on_click: Msg) -> Element(Msg) {
+  html.div(
+    [
+      attribute.class("flex h-screen w-screen justify-center center-content"),
+    ],
+    [
+      html.button(
+        [
+          attribute.class("w-full h-full"),
+          event.on_click(on_click),
+        ],
+        [
+          html.text(text),
+        ],
+      ),
+    ],
+  )
+}
+
 fn game_view(gs: GameState, _ui: UiState) -> Element(Msg) {
-  html.div([attribute.class("flex flex-col")], [
-    html.h1([], [html.text("playing")]),
-    play_mat.play_ui(gs),
-    html.div([attribute.class("flex flex-row flex-wrap gap-3 justify-center")], [
-      html.button([event.on_click(UserClickedForfeit)], [
-        html.text({
-          case gs.phase {
-            game_state.Won -> "WON"
-            _ -> "Forfeit"
-          }
-        }),
-      ]),
-    ]),
-  ])
+  case gs.phase {
+    game_state.Lost -> {
+      full_screen_button("Lost", UserClickedForfeit)
+    }
+    _ -> {
+      html.div([attribute.class("flex flex-col")], [
+        html.h1([], [html.text("playing")]),
+        play_mat.play_ui(gs),
+        html.div(
+          [attribute.class("flex flex-row flex-wrap gap-3 justify-center")],
+          [
+            html.button([event.on_click(UserClickedForfeit)], [
+              html.text({
+                case gs.phase {
+                  game_state.Won -> "WON"
+                  _ -> "Forfeit"
+                }
+              }),
+            ]),
+          ],
+        ),
+      ])
+    }
+  }
 }
