@@ -1,3 +1,4 @@
+import components/castle_ui
 import components/discard_ui
 import components/hand_ui
 import components/in_play_ui
@@ -12,24 +13,29 @@ import regicide/game_state.{type GameState}
 
 pub fn play_ui(gs: GameState) -> Element(Msg) {
   html.div([attribute.class("grid grid-rows-4 gap-3")], [
-    html.div([attribute.class("row-1 flex gap-3 justify-self-center")], [
-      html.div(
-        [
-          attribute.class(
-            "w-min flex flex-col justify-center col-1 justify-self-end flex-grow",
-          ),
-        ],
-        [
-          tavern_ui.tavern_view(gs),
-          discard_ui.discard_view(gs),
-          joker_ui.joker_view(gs),
-        ],
-      ),
-      html.div([attribute.class("col-2 flex-shrink")], [
-        opponent_ui.opponent_card_view(gs),
+    html.div([attribute.class("row-1 flex flex-col place-content-center")], [
+      html.div([attribute.class("flex gap-3 place-self-center")], [
+        castle_ui.castle_view(gs),
       ]),
-      html.div([attribute.class("col-3 justify-self-start flex-grow")], [
-        opponent_ui.opponent_stats_view(gs),
+      html.div([attribute.class("flex gap-3 place-self-center")], [
+        html.div(
+          [
+            attribute.class(
+              "w-min flex flex-col justify-center col-1 justify-self-end flex-grow",
+            ),
+          ],
+          [
+            tavern_ui.tavern_view(gs),
+            discard_ui.discard_view(gs),
+            joker_ui.joker_view(gs),
+          ],
+        ),
+        html.div([attribute.class("col-2 flex-shrink")], [
+          opponent_ui.opponent_card_view(gs),
+        ]),
+        html.div([attribute.class("col-3 justify-self-start flex-grow")], [
+          opponent_ui.opponent_stats_view(gs),
+        ]),
       ]),
     ]),
 
