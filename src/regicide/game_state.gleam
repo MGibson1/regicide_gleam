@@ -42,11 +42,7 @@ pub fn new() -> GameState {
 }
 
 pub fn discard_hand(gs: GameState) -> GameState {
-  GameState(
-    ..gs,
-    discard: gs.discard |> list.append(gs.hand |> set.to_list) |> list.shuffle,
-    hand: set.from_list([]),
-  )
+  discard(gs, gs.hand)
 }
 
 pub fn discard(gs: GameState, cards: Set(Card)) -> GameState {
@@ -61,13 +57,53 @@ pub fn discard(gs: GameState, cards: Set(Card)) -> GameState {
   GameState(..gs, hand:, discard:)
 }
 
+pub fn draw(gs: GameState, count: Int) -> GameState {
+  let max = max_hand_size - set.size(gs.hand)
+  let draw = int.min(count, max)
+
+  let #(add_to_hand, tavern) = gs.tavern |> card.draw_up_to(draw)
+  let hand = gs.hand |> set.union(set.from_list(add_to_hand))
+
+  GameState(..gs, tavern:, hand:)
+}
+
+pub fn heal(gs: GameState, count: Int) -> GameState {
+  let #(drew, discard) = gs.discard |> list.shuffle |> card.draw_up_to(count)
+  let tavern = gs.tavern |> list.append(drew)
+
+  GameState(..gs, tavern:, discard:)
+}
+
+pub fn damage_opponent(gs: GameState, damage damage: Int) -> GameState {
+  let opponent = gs.opponent |> opponent.damage(damage)
+  GameState(..gs, opponent:)
+}
+
+pub fn opponent_attack_through_shield(gs: GameState) -> Int {
+  let damage = gs.opponent |> opponent.attack
+  let shield = turn.defend(gs.in_play, gs.opponent)
+  int.max(0, damage - shield)
+}
+
+pub fn take_losses(gs: GameState, cards: Set(Card)) -> GameState {
+  let power = cards |> card.total_power
+  let gs = gs |> discard(cards)
+
+  let next_gs = GameState(..gs, phase: Attacking(set.new()))
+
+  case opponent_attack_through_shield(gs) - power <= 0 {
+    True -> next_gs
+    False -> GameState(..next_gs, phase: Lost)
+  }
+}
+
 pub fn redraw(gs: GameState) -> GameState {
   case gs.redraws {
     n if n < 1 -> gs
     _ ->
       GameState(..gs, redraws: gs.redraws - 1)
       |> discard_hand
-      |> apply_draw(max_hand_size)
+      |> draw(max_hand_size)
   }
 }
 
@@ -80,11 +116,19 @@ pub fn discard_in_play(gs: GameState) -> GameState {
 fn draw_opponent(gs: GameState) -> GameState {
   let gs = gs |> discard_in_play
 
+  let op_card = gs.opponent |> opponent.card
+  let #(tavern, discard) = case gs.opponent |> opponent.health {
+    n if n == 0 -> #([op_card, ..gs.tavern], gs.discard)
+    _ -> #(gs.tavern, [op_card, ..gs.discard])
+  }
+
   case gs.castle |> card.draw(1) {
     Ok(#([o], castle)) -> {
       GameState(
         ..gs,
         castle:,
+        tavern:,
+        discard:,
         opponent: opponent.from(o),
         phase: Attacking(set.new()),
       )
@@ -94,32 +138,7 @@ fn draw_opponent(gs: GameState) -> GameState {
 }
 
 pub fn take_turn(gs: GameState) -> GameState {
-  case gs.phase {
-    Attacking(with) -> gs |> attack(with) |> set_in_play(with)
-    Defending(with) -> gs |> take_losses(with)
-    _ -> gs
-  }
-}
-
-pub fn set_in_play(gs: GameState, cards: Set(Card)) {
-  GameState(..gs, in_play: gs.in_play |> list.append([cards]))
-}
-
-pub fn attack(gs: GameState, with cards: Set(Card)) -> GameState {
-  let effect = cards |> turn.effect(gs.in_play, gs.opponent)
-  let gs = gs |> discard(cards)
-
-  // Heal
-  let gs = apply_heal(gs, effect.heal)
-
-  // Draw
-  let gs = apply_draw(gs, effect.draw)
-
-  // Damage
-  let gs = apply_damage(gs, effect.damage)
-
-  // Shield happens during defending phase
-  let gs = GameState(..gs, phase: Defending(set.new()))
+  let gs = gs |> preview_turn
 
   case gs.opponent |> opponent.health {
     h if h > 0 -> gs
@@ -127,39 +146,35 @@ pub fn attack(gs: GameState, with cards: Set(Card)) -> GameState {
   }
 }
 
-pub fn apply_heal(gs: GameState, heal heal: Int) -> GameState {
-  let #(drew, discard) = gs.discard |> list.shuffle |> card.draw_up_to(heal)
-  let tavern = gs.tavern |> list.append(drew)
-
-  GameState(..gs, tavern:, discard:)
-}
-
-pub fn apply_draw(gs: GameState, draw draw: Int) -> GameState {
-  let max_draw = int.min(max_hand_size - set.size(gs.hand), draw)
-  let #(add_to_hand, tavern) = gs.tavern |> card.draw_up_to(max_draw)
-  let hand = gs.hand |> set.to_list |> list.append(add_to_hand) |> set.from_list
-
-  GameState(..gs, hand:, tavern:)
-}
-
-pub fn apply_damage(gs: GameState, damage damage: Int) -> GameState {
-  let opponent = gs.opponent |> opponent.damage(damage)
-  GameState(..gs, opponent:)
-}
-
-pub fn take_losses(gs: GameState, cards: Set(Card)) -> GameState {
-  let power = cards |> card.total_power
-  let gs = gs |> discard(cards)
-
-  let damage = gs.opponent |> opponent.attack
-  let shield = turn.defend(gs.in_play, gs.opponent)
-
-  let next_gs = GameState(..gs, phase: Attacking(set.new()))
-
-  case damage - shield - power <= 0 {
-    True -> next_gs
-    False -> GameState(..next_gs, phase: Lost)
+pub fn preview_turn(gs: GameState) -> GameState {
+  case gs.phase {
+    Attacking(with) -> gs |> attack(with)
+    Defending(with) -> gs |> take_losses(with)
+    _ -> gs
   }
+}
+
+pub fn set_in_play(gs: GameState, cards: Set(Card)) {
+  let hand = gs.hand |> card.remove(cards)
+  let in_play = gs.in_play |> list.append([cards])
+  GameState(..gs, in_play:, hand:)
+}
+
+pub fn attack(gs: GameState, with cards: Set(Card)) -> GameState {
+  let effect = cards |> turn.effect(gs.in_play, gs.opponent) |> echo
+  let gs = gs |> set_in_play(cards)
+
+  // Heal
+  let gs = heal(gs, effect.heal)
+
+  // Draw
+  let gs = draw(gs, effect.draw)
+
+  // Damage
+  let gs = damage_opponent(gs, effect.damage)
+
+  // Shield happens during defending phase
+  GameState(..gs, phase: Defending(set.new()))
 }
 
 pub fn sufficient_losses(gs: GameState) -> Bool {

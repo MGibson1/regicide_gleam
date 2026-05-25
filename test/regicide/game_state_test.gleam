@@ -91,7 +91,7 @@ pub fn apply_heal_test() {
   let gs = random_game_state()
   let result =
     gs
-    |> game_state.apply_heal(1)
+    |> game_state.heal(1)
 
   case gs.discard |> list.length {
     0 -> result |> should.equal(gs)
@@ -114,7 +114,7 @@ pub fn apply_over_heal_test() {
   let gs = random_game_state()
   let result =
     gs
-    |> game_state.apply_heal(100)
+    |> game_state.heal(100)
 
   case gs.discard |> list.length {
     0 -> result |> should.equal(gs)
@@ -139,7 +139,7 @@ pub fn attempt_to_draw_over_max_hand_size_test() {
   let gs = random_game_state()
   let result =
     gs
-    |> game_state.apply_draw(10)
+    |> game_state.draw(10)
 
   case gs.hand |> set.size {
     8 -> result |> should.equal(gs)
@@ -166,7 +166,7 @@ pub fn apply_draw_test() {
   let gs = random_game_state()
   let result =
     gs
-    |> game_state.apply_draw(1)
+    |> game_state.draw(1)
 
   case gs.hand |> set.size {
     8 -> result |> should.equal(gs)
@@ -191,7 +191,7 @@ pub fn damage_opponent_test() {
   let damage = int.random(100)
   let result =
     gs
-    |> game_state.apply_damage(damage)
+    |> game_state.damage_opponent(damage)
 
   result.opponent |> opponent.health |> should.equal(original_health - damage)
 }

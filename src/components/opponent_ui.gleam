@@ -21,23 +21,17 @@ pub fn opponent_card_view(gs: GameState) {
 }
 
 pub fn opponent_stats_view(gs: GameState) {
-  let selected_effect = gs |> game_state.selected_effect
+  let next_gs = gs |> game_state.preview_turn
 
-  let curr_attack =
-    opponent.attack(gs.opponent) - turn.defend(gs.in_play, gs.opponent)
-  let next_attack = { gs.opponent |> opponent.attack } - selected_effect.shield
-
-  let curr_health = gs.opponent |> opponent.health
-  let next_health = curr_health - selected_effect.damage
+  let health = fn(state: GameState) {
+    state.opponent |> opponent.health |> int.to_string
+  }
+  let attack = fn(state: GameState) {
+    state |> game_state.opponent_attack_through_shield |> int.to_string
+  }
 
   html.div([attribute.class("flex flex-col justify-center h-full")], [
-    labeled_text(
-      "health",
-      curr_health |> int.to_string <> "(" <> next_health |> int.to_string <> ")",
-    ),
-    labeled_text(
-      "attack",
-      curr_attack |> int.to_string <> "(" <> next_attack |> int.to_string <> ")",
-    ),
+    labeled_text("health", gs |> health <> "(" <> next_gs |> health <> ")"),
+    labeled_text("attack", gs |> attack <> "(" <> next_gs |> attack <> ")"),
   ])
 }

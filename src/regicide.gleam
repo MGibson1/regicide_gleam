@@ -84,13 +84,6 @@ fn game_view(gs: GameState, ui: UiState) -> Element(Msg) {
   html.div([attribute.class("flex flex-col")], [
     html.h1([], [html.text("playing")]),
     play_mat.play_ui(gs),
-    // html.div([], [
-    //   tavern_view(gs),
-    //   discard_view(gs),
-    //   opponent_view(gs),
-    //   view_in_play(gs),
-    //   view_hand(gs),
-    // ]),
     html.div([attribute.class("flex flex-row flex-wrap gap-3 justify-center")], [
       {
         case gs.phase {
@@ -109,7 +102,14 @@ fn game_view(gs: GameState, ui: UiState) -> Element(Msg) {
           _ -> element.none()
         }
       },
-      html.button([event.on_click(UserClickedForfeit)], [html.text("Forfeit")]),
+      html.button([event.on_click(UserClickedForfeit)], [
+        html.text({
+          case gs.phase {
+            game_state.Won -> "WON"
+            _ -> "Forfeit"
+          }
+        }),
+      ]),
     ]),
   ])
 }

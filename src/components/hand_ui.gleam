@@ -15,7 +15,12 @@ pub fn view_hand(gs: GameState) -> Element(Msg) {
     html.h2([], [html.text("hand")]),
     html.div(
       [attribute.class("flex flex-wrap justify-center content-center")],
-      { gs.hand |> set.to_list |> list.map(hand_card(_, gs)) },
+      {
+        gs.hand
+        |> set.to_list
+        |> card.sort_by_suit
+        |> list.map(hand_card(_, gs))
+      },
     ),
   ])
 }
