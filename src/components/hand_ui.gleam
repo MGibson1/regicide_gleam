@@ -76,9 +76,15 @@ fn play_button(gs: GameState) -> Element(Msg) {
       html.div(
         [attribute.class("grid grid-col-1 justify-center content-center")],
         [
-          html.button([event.on_click(model.UserClickedPlayCards)], [
-            html.text("Take Losses"),
-          ]),
+          html.button(
+            [
+              attribute.disabled(!{ gs |> game_state.sufficient_losses }),
+              event.on_click(model.UserClickedPlayCards),
+            ],
+            [
+              html.text("Take Losses"),
+            ],
+          ),
           html.text("remaining: " <> remaining),
         ],
       )
