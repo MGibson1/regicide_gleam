@@ -28,26 +28,8 @@ pub fn view_card(card: Card, gs: game_state.GameState) -> Element(Msg) {
       attribute.classes([#("border-3", gs |> game_state.is_selected(card))]),
     ],
     [
-      labeled_text("suit", suit_text(card)),
-      labeled_text("value", value_text(card)),
+      labeled_text("suit", card |> suit_string),
+      labeled_text("value", card |> value_string),
     ],
   )
-}
-
-fn value_text(card: Card) -> String {
-  case card |> card.value {
-    Num(n) -> int.to_string(n)
-    Face(Jack) -> "Jack"
-    Face(Queen) -> "Queen"
-    Face(King) -> "King"
-  }
-}
-
-fn suit_text(card: Card) -> String {
-  case card |> card.suit {
-    card.Shield -> "Shield"
-    card.Heart -> "Heart"
-    card.Club -> "Club"
-    card.Draw -> "Draw"
-  }
 }

@@ -56,6 +56,10 @@ pub fn value_string(c: Card) -> String {
   }
 }
 
+pub fn suit_string(c: Card) -> String {
+  c.suit |> suit_string_inner
+}
+
 pub fn attack_value(c: Card) -> Int {
   case c.value {
     Num(n) -> n
@@ -165,7 +169,7 @@ pub type Suit {
   Club
 }
 
-fn suit_string(s: Suit) -> String {
+fn suit_string_inner(s: Suit) -> String {
   case s {
     Shield -> "Shield"
     Heart -> "Heart"
@@ -175,7 +179,7 @@ fn suit_string(s: Suit) -> String {
 }
 
 fn suit_to_json(suit: Suit) -> json.Json {
-  suit |> suit_string |> json.string
+  suit |> suit_string_inner |> json.string
 }
 
 fn suit_decoder() -> decode.Decoder(Suit) {
