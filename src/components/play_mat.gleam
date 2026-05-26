@@ -10,9 +10,10 @@ import lustre/element.{type Element}
 import lustre/element/html
 import model.{type Msg}
 import regicide/game_state.{type GameState}
+import regicide/ui_state.{type UiState}
 
-pub fn play_ui(gs: GameState) -> Element(Msg) {
-  html.div([attribute.class("grid grid-rows-4 gap-3")], [
+pub fn play_ui(gs: GameState, ui: UiState) -> Element(Msg) {
+  html.div([attribute.class("grid grid-rows-4 gap-3 p-3")], [
     html.div([attribute.class("row-1 flex flex-col place-content-center")], [
       html.div([attribute.class("flex gap-3 place-self-center")], [
         castle_ui.castle_view(gs),
@@ -40,6 +41,6 @@ pub fn play_ui(gs: GameState) -> Element(Msg) {
     ]),
 
     in_play_ui.view_in_play(gs),
-    hand_ui.view_hand(gs),
+    hand_ui.view_hand(gs, ui),
   ])
 }

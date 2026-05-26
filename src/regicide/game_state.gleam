@@ -53,19 +53,16 @@ pub fn game_state_decoder() -> decode.Decoder(GameState) {
   use in_play <- decode.field("in_play", decode.list(card.card_set_decoder()))
   use redraws <- decode.field("redraws", decode.int)
   use phase <- decode.field("phase", phase_decoder())
-  decode.success(
-    GameState(
-      castle:,
-      tavern:,
-      discard:,
-      opponent:,
-      hand:,
-      in_play:,
-      redraws:,
-      phase:,
-    )
-    |> echo,
-  )
+  decode.success(GameState(
+    castle:,
+    tavern:,
+    discard:,
+    opponent:,
+    hand:,
+    in_play:,
+    redraws:,
+    phase:,
+  ))
 }
 
 pub type Phase {

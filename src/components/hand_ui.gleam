@@ -7,13 +7,19 @@ import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
 import lustre/event
-import model.{type Msg}
+import model.{type Msg, UserChangedSort}
 import regicide/card.{type Card}
 import regicide/game_state.{type GameState}
+import regicide/toggle
 import regicide/turn
+import regicide/ui_state.{type UiState, BySuit, ByValue}
 
-pub fn view_hand(gs: GameState) -> Element(Msg) {
-  html.div([attribute.class("row-3 col-span-full min-h-24")], [
+pub fn view_hand(gs: GameState, ui: UiState) -> Element(Msg) {
+  let sorting_fn = case ui.sort {
+    BySuit -> card.sort_by_suit
+    ByValue -> card.sort_by_value
+  }
+  html.div([attribute.class("row-3 col-span-full min-h-24 flex flex-col")], [
     html.h2([], [html.text("hand")]),
     play_button(gs),
     html.div(
@@ -21,10 +27,23 @@ pub fn view_hand(gs: GameState) -> Element(Msg) {
       {
         gs.hand
         |> set.to_list
-        |> card.sort_by_suit
+        |> sorting_fn
         |> list.map(hand_card(_, gs))
       },
     ),
+    html.div([attribute.class("self-end")], [
+      toggle.toggle(
+        "sort_by",
+        #("Suit", UserChangedSort(BySuit)),
+        #("Value", UserChangedSort(ByValue)),
+        {
+          case ui.sort {
+            BySuit -> toggle.Left
+            _ -> toggle.Right
+          }
+        },
+      ),
+    ]),
   ])
 }
 

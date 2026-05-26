@@ -5,7 +5,7 @@ import lustre/effect.{type Effect}
 import plinth/javascript/storage
 import regicide/card.{type Card}
 import regicide/game_state.{type GameState}
-import regicide/ui_state.{type UiState}
+import regicide/ui_state.{type Sort, type UiState}
 
 pub type Model {
   None
@@ -46,6 +46,7 @@ pub type Msg {
   UserClickedRedraw
   UserClickedCardInHand(Card)
   UserClickedPlayCards
+  UserChangedSort(Sort)
 
   GameSaved
   GameLoaded(Model)

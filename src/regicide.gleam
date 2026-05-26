@@ -7,8 +7,8 @@ import lustre/element/html
 import lustre/event
 import model.{
   type Model, type Msg, Empty, GameLoaded, GameSaved, None, Playing,
-  UserClickedCardInHand, UserClickedForfeit, UserClickedPlayCards,
-  UserClickedRedraw, UserClickedStartGame,
+  UserChangedSort, UserClickedCardInHand, UserClickedForfeit,
+  UserClickedPlayCards, UserClickedRedraw, UserClickedStartGame,
 }
 import regicide/game_state.{type GameState}
 import regicide/ui_state.{type UiState}
@@ -55,6 +55,14 @@ fn update(model: Model, message: Msg) -> #(Model, Effect(Msg)) {
           #(model, model.save(model, GameSaved))
         }
       }
+    UserChangedSort(by) ->
+      case model {
+        None -> #(model, effect.none())
+        Playing(gs, ui) -> {
+          let model = Playing(gs, ui |> ui_state.sort(by))
+          #(model, model.save(model, GameSaved))
+        }
+      }
 
     GameSaved -> #(model, effect.none())
     GameLoaded(loaded) -> #(loaded, effect.none())
@@ -93,7 +101,7 @@ fn full_screen_button(text: String, on_click: Msg) -> Element(Msg) {
   )
 }
 
-fn game_view(gs: GameState, _ui: UiState) -> Element(Msg) {
+fn game_view(gs: GameState, ui: UiState) -> Element(Msg) {
   case gs.phase {
     game_state.Lost -> {
       full_screen_button("Lost", UserClickedForfeit)
@@ -104,7 +112,7 @@ fn game_view(gs: GameState, _ui: UiState) -> Element(Msg) {
     _ -> {
       html.div([attribute.class("flex flex-col")], [
         html.h1([], [html.text("playing")]),
-        play_mat.play_ui(gs),
+        play_mat.play_ui(gs, ui),
         html.div(
           [attribute.class("flex flex-row flex-wrap gap-3 justify-center")],
           [
