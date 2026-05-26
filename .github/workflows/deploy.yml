@@ -2,7 +2,8 @@ name: Deploy to Pages
 
 on:
   push:
-    branches: [$default-branch]
+    branches:
+      - main
   workflow_dispatch:
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
@@ -27,12 +28,16 @@ jobs:
         run: gleam deps download
       - name: Build app
         run: gleam run -m lustre/dev build --minify --outdir=dist
+      - name: Move build assets to upload dir
+        run: |
+          mv dist/regicide.css priv/static/
+          mv dist/regicide.js priv/static/
       - name: Setup Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d #v6
       - name: Upload artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 #v5
         with:
-          path: "dist"
+          path: "priv/static"
   deploy:
     needs: build
     permissions:
