@@ -5,7 +5,7 @@ import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
 import model.{type Msg}
-import regicide/card.{type Card, Face, Jack, King, Num, Queen}
+import regicide/card.{type Card}
 import regicide/game_state
 
 pub fn face_down_pile(
@@ -28,8 +28,8 @@ pub fn view_card(card: Card, gs: game_state.GameState) -> Element(Msg) {
       attribute.classes([#("border-3", gs |> game_state.is_selected(card))]),
     ],
     [
-      labeled_text("suit", card |> suit_string),
-      labeled_text("value", card |> value_string),
+      labeled_text("suit", card |> card.suit_string),
+      labeled_text("value", card |> card.value_string),
     ],
   )
 }

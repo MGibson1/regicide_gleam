@@ -10,7 +10,7 @@ import model.{
   UserClickedCardInHand, UserClickedForfeit, UserClickedPlayCards,
   UserClickedRedraw, UserClickedStartGame,
 }
-import regicide/game_state.{type GameState, Attacking, Defending}
+import regicide/game_state.{type GameState}
 import regicide/ui_state.{type UiState}
 
 pub fn main() {
@@ -98,6 +98,9 @@ fn game_view(gs: GameState, _ui: UiState) -> Element(Msg) {
     game_state.Lost -> {
       full_screen_button("Lost", UserClickedForfeit)
     }
+    game_state.Won -> {
+      full_screen_button("Won!!", UserClickedForfeit)
+    }
     _ -> {
       html.div([attribute.class("flex flex-col")], [
         html.h1([], [html.text("playing")]),
@@ -106,12 +109,7 @@ fn game_view(gs: GameState, _ui: UiState) -> Element(Msg) {
           [attribute.class("flex flex-row flex-wrap gap-3 justify-center")],
           [
             html.button([event.on_click(UserClickedForfeit)], [
-              html.text({
-                case gs.phase {
-                  game_state.Won -> "WON"
-                  _ -> "Forfeit"
-                }
-              }),
+              html.text("Forfeit"),
             ]),
           ],
         ),
