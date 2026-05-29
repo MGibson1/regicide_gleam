@@ -13,7 +13,7 @@ import regicide/game_state.{type GameState}
 import regicide/ui_state.{type UiState}
 
 pub fn play_ui(gs: GameState, ui: UiState) -> Element(Msg) {
-  html.div([attribute.class("grid grid-rows-4 gap-3 p-3")], [
+  html.div([attribute.class("grid grid-rows-3 gap-3 p-3")], [
     html.div([attribute.class("row-1 flex flex-col place-content-center")], [
       html.div([attribute.class("flex gap-3 place-self-center")], [
         castle_ui.castle_view(gs),
