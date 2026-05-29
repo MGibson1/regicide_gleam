@@ -1,6 +1,7 @@
 import components/card_ui.{view_card}
 import components/ui.{labeled_text}
 import gleam/int
+import gleam/option
 import lustre/attribute
 import lustre/element/html
 import regicide/game_state.{type GameState}
@@ -8,7 +9,7 @@ import regicide/opponent
 
 pub fn opponent_card_view(gs: GameState) {
   html.div([attribute.class("flex flex-col justify-center h-full")], [
-    view_card(gs.opponent |> opponent.card, gs),
+    view_card(gs.opponent |> opponent.card, gs, option.None),
   ])
 }
 

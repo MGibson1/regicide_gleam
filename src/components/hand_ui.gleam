@@ -2,6 +2,7 @@ import components/card_ui.{view_card}
 import gleam/bool
 import gleam/int
 import gleam/list
+import gleam/option
 import gleam/set
 import lustre/attribute
 import lustre/element.{type Element}
@@ -65,7 +66,7 @@ fn hand_card(card: Card, gs: GameState) -> Element(Msg) {
       event.on_click(model.UserClickedCardInHand(card)),
     ],
     [
-      view_card(card, gs),
+      view_card(card, gs, option.None),
     ],
   )
 }

@@ -3,7 +3,9 @@ import gleam/int
 import gleam/json
 import gleam/list
 import gleam/order.{type Order}
+import gleam/result
 import gleam/set.{type Set}
+import gleam/string
 import regicide/list_helper.{index_of, sort_by}
 
 pub opaque type Card {
@@ -56,8 +58,19 @@ pub fn value_string(c: Card) -> String {
   }
 }
 
+pub fn short_value_string(c: Card) -> String {
+  case c.value {
+    Num(v) -> v |> int.to_string
+    Face(v) -> v |> face_type_string |> string.first |> result.unwrap("E")
+  }
+}
+
 pub fn suit_string(c: Card) -> String {
   c.suit |> suit_string_inner
+}
+
+pub fn suit_short_string(c: Card) -> String {
+  c |> suit_string |> string.first |> result.unwrap("E")
 }
 
 pub fn attack_value(c: Card) -> Int {
