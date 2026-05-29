@@ -60,7 +60,7 @@ pub fn valid_three_of_a_kind_test() {
     [
       card.card(card.Num(2), card.Heart),
       card.card(card.Num(2), card.Draw),
-      card.card(card.Num(2), card.Draw),
+      card.card(card.Num(2), card.Shield),
     ]
     |> set.from_list
   turn.is_valid(play) |> should.be_true
@@ -69,7 +69,7 @@ pub fn valid_three_of_a_kind_test() {
     [
       card.card(card.Num(3), card.Heart),
       card.card(card.Num(3), card.Draw),
-      card.card(card.Num(3), card.Draw),
+      card.card(card.Num(3), card.Shield),
     ]
     |> set.from_list
   turn.is_valid(play) |> should.be_true
