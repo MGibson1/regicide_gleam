@@ -1,4 +1,5 @@
 import components/play_mat
+import history
 import lustre
 import lustre/attribute
 import lustre/effect.{type Effect}
@@ -6,9 +7,10 @@ import lustre/element.{type Element}
 import lustre/element/html
 import lustre/event
 import model.{
-  type Model, type Msg, Empty, GameLoaded, GameSaved, None, Playing,
-  UserChangedSort, UserClickedCardInHand, UserClickedForfeit,
-  UserClickedPlayCards, UserClickedRedraw, UserClickedStartGame,
+  type Model, type Msg, Empty, GameInProgress, GameLoaded, GameSaved, None,
+  Playing, UserChangedSort, UserClickedCardInHand, UserClickedForfeit,
+  UserClickedPlayCards, UserClickedRedo, UserClickedRedraw, UserClickedStartGame,
+  UserClickedUndo,
 }
 import regicide/game_state.{type GameState}
 import regicide/ui_state.{type UiState}
@@ -27,39 +29,69 @@ fn init(_args) -> #(Model, Effect(Msg)) {
 fn update(model: Model, message: Msg) -> #(Model, Effect(Msg)) {
   case message {
     UserClickedStartGame -> {
-      let model = Playing(gs: game_state.new(), ui: ui_state.new())
-      #(model, model.save(model, GameSaved))
+      #(
+        GameInProgress(
+          history.new(Playing(gs: game_state.new(), ui: ui_state.new())),
+        ),
+        model.save(model, GameSaved),
+      )
     }
     UserClickedForfeit -> #(None, model.delete_save())
     UserClickedRedraw ->
       case model {
         None -> #(model, effect.none())
-        Playing(gs, ui) -> {
-          let model = Playing(gs |> game_state.redraw, ui)
+        GameInProgress(h) -> {
+          let Playing(gs, ui) = h |> history.current
+          let model = model |> model.next(Playing(gs |> game_state.redraw, ui))
           #(model, model.save(model, GameSaved))
         }
       }
     UserClickedCardInHand(card) ->
       case model {
         None -> #(model, effect.none())
-        Playing(gs, ui) -> {
-          let model = Playing(gs |> game_state.toggle_selected(card), ui)
+        GameInProgress(h) -> {
+          let Playing(gs, ui) = h |> history.current
+          let model =
+            model
+            |> model.update(Playing(gs |> game_state.toggle_selected(card), ui))
           #(model, model.save(model, GameSaved))
         }
       }
     UserClickedPlayCards ->
       case model {
         None -> #(model, effect.none())
-        Playing(gs, ui) -> {
-          let model = Playing(gs |> game_state.take_turn, ui)
+        GameInProgress(h) -> {
+          let Playing(gs, ui) = h |> history.current
+          let model =
+            model
+            |> model.next(Playing(gs |> game_state.take_turn, ui))
           #(model, model.save(model, GameSaved))
         }
       }
     UserChangedSort(by) ->
       case model {
         None -> #(model, effect.none())
-        Playing(gs, ui) -> {
-          let model = Playing(gs, ui |> ui_state.sort(by))
+        GameInProgress(h) -> {
+          let Playing(gs, ui) = h |> history.current
+          let model =
+            model
+            |> model.update(Playing(gs, ui |> ui_state.sort(by)))
+          #(model, model.save(model, GameSaved))
+        }
+      }
+    UserClickedUndo ->
+      case model {
+        None -> #(model, effect.none())
+        GameInProgress(h) -> {
+          let model = model |> model.undo
+          #(model, model.save(model, GameSaved))
+        }
+      }
+    UserClickedRedo ->
+      case model {
+        None -> #(model, effect.none())
+        GameInProgress(h) -> {
+          let model = model |> model.redo
           #(model, model.save(model, GameSaved))
         }
       }
@@ -76,7 +108,10 @@ fn view(model: Model) -> Element(Msg) {
     {
       case model {
         None -> full_screen_button("Start Game", UserClickedStartGame)
-        Playing(gs, ui) -> game_view(gs, ui)
+        GameInProgress(history) -> {
+          let Playing(gs, ui) = history |> history.current
+          game_view(gs, ui)
+        }
       }
     },
   ])

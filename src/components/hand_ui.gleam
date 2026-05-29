@@ -23,6 +23,12 @@ pub fn view_hand(gs: GameState, ui: UiState) -> Element(Msg) {
   html.div([attribute.class("row-3 col-span-full min-h-24 flex flex-col")], [
     html.h2([], [html.text("hand")]),
     play_button(gs),
+    html.button([event.on_click(model.UserClickedUndo)], [
+      html.span([], [html.text("Undo")]),
+    ]),
+    html.button([event.on_click(model.UserClickedRedo)], [
+      html.span([], [html.text("Redo")]),
+    ]),
     html.div(
       [attribute.class("flex flex-wrap justify-center content-center")],
       {
