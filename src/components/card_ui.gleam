@@ -36,7 +36,7 @@ fn card_internal(
   html.div(
     [
       attribute.class(
-        "relative flex flex-col place-content-center text-center w-[6.25rem] h-[9rem] rounded-xl bg-white shadow-md border-1 "
+        "relative cursor-default flex flex-col place-content-center text-center w-[6.25rem] h-[9rem] rounded-xl bg-white shadow-md border-1 "
         <> option.unwrap(additional_classes, ""),
       ),
       attribute.classes([#("border-3", selected)]),
