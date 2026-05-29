@@ -3,6 +3,7 @@ import gleam/int
 import gleam/json
 import gleam/list
 import gleam/set.{type Set}
+import helpers
 import regicide/card.{type Card}
 import regicide/constants.{max_hand_size}
 import regicide/opponent.{type Opponent}
@@ -132,7 +133,7 @@ pub fn discard_hand(gs: GameState) -> GameState {
 }
 
 pub fn discard(gs: GameState, cards: Set(Card)) -> GameState {
-  case cards |> set.is_subset(gs.hand) {
+  case cards |> helpers.is_subset(gs.hand) {
     True -> Nil
     False -> panic as "cannot discard card not in hand"
   }

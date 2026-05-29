@@ -6,6 +6,7 @@ import gleam/order.{type Order}
 import gleam/result
 import gleam/set.{type Set}
 import gleam/string
+import helpers
 import regicide/list_helper.{index_of, sort_by}
 
 pub opaque type Card {
@@ -257,7 +258,7 @@ pub fn draw_up_to(from l: List(a), take n: Int) -> #(List(a), List(a)) {
 
 pub fn remove(from l: Set(a), take c: Set(a)) -> Set(a) {
   // cards not available
-  case c |> set.is_subset(l) {
+  case c |> helpers.is_subset(l) {
     True -> Nil
     False -> panic as "trying to remove cards that do not exist"
   }
